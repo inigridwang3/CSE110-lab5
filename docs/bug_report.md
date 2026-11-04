@@ -12,7 +12,7 @@
 <!-- Which file and function was the bug in, and what was wrong with the code?
      Explain why that code produced the behavior described in the ticket. -->
 
-**File / function:i `src/screens/MenuScreen/MenuScreenController.ts` / `loadStatsFromServer()`**
+**File / function:i `MenuScreenController.ts` / `loadStatsFromServer()`**
 
 **What was wrong:** The frontend fetch request requested `/api/stat` (singular) instead of the correct backend Express route `/api/stats` (plural), resulting in a `404 Not Found` response. This uncaught HTTP error triggered the catch block in the controller, leaving the stats object null and causing the UI to permanently fall back to displaying "Stats unavailable".
 
@@ -53,7 +53,7 @@ Started both the Express backend and Vite dev server, and the start screen corre
 
 ### Actual cause
 
-**File / function:** `server/index.ts` / `app.get("/api/stats", ...)`
+**File / function:** `index.ts` / `app.get("/api/stats", ...)`
 
 **What was wrong:** The loop responsible for calculating the best score initialized `best` to `0` and checked `if (entries[i].score < best)`. Because game scores are positive integers, no score was ever less than 0, causing `best` to remain permanently stuck at 0 regardless of what scores were saved on the leaderboard.
 
@@ -85,7 +85,7 @@ Restarted the Express server, and verified via the browser that the start screen
 
 ### Actual cause
 
-**File / function:** `src/screens/GameScreen/GameScreenView.ts` / `randomizeLemonPosition()`
+**File / function:** `GameScreenView.ts` / `randomizeLemonPosition()`
 
 **What was wrong:** The position generator used `Math.round(Math.random())` instead of continuous random values, forcing coordinates to strictly evaluate to either 0 or 1 multiplier offsets. This restricted the lemon's movement to only four fixed corner positions.
 
@@ -117,7 +117,7 @@ Started a new game, clicked the lemon multiple times, and verified that it now s
 
 ### Actual cause
 
-**File / function:** `src/screens/GameScreen/GameScreenController.ts` / `endGame()`
+**File / function:** `GameScreenController.ts` / `endGame()`
 
 **What was wrong:** The `endGame()` method referenced `this.stopTimer;` as a property reference instead of invoking it with parentheses (`this.stopTimer()`). As a result, the timer interval created by `setInterval` was never cleared when the time expired, causing `endGame()` to re-trigger infinitely every second. This looped the game-over sound, flooded the leaderboard with duplicate score entries, and prevented the player from staying on the menu screen.
 
@@ -149,7 +149,7 @@ Started a game, let the timer reach zero, verified that the game-over sound play
 
 ### Actual cause
 
-**File / function:** `src/screens/ResultsScreen/ResultsScreenView.ts` / `updateLeaderboard()`
+**File / function:** `ResultsScreenView.ts` / `updateLeaderboard()`
 
 **What was wrong:** The leaderboard rendering logic attempted to read `entry.timestamp`, but the backend/model object provided the date property under `entry.date`. Because `entry.timestamp` did not exist on the entry objects, JavaScript evaluated it as `undefined`.
 
