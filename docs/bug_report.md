@@ -110,3 +110,35 @@ Hypothesis: The coordinate generation logic uses a binary choice (like 0 or 1 mu
 ### Confirming the fix
 
 Started a new game, clicked the lemon multiple times, and verified that it now spawns dynamically and unpredictably across various random coordinates on the stage.
+
+---
+
+## Ticket 4: Stuck on the Game Over screen
+
+### Actual cause
+
+**File / function:** `src/screens/GameScreen/GameScreenController.ts` / `endGame()`
+
+**What was wrong:** The `endGame()` method referenced `this.stopTimer;` as a property reference instead of invoking it with parentheses (`this.stopTimer()`). As a result, the timer interval created by `setInterval` was never cleared when the time expired, causing `endGame()` to re-trigger infinitely every second. This looped the game-over sound, flooded the leaderboard with duplicate score entries, and prevented the player from staying on the menu screen.
+
+### Fix
+
+Added parentheses to `this.stopTimer()` inside `endGame()` so the interval is successfully cleared when the game concludes.
+
+### How did you find it?
+
+#### Hypothesis testing
+
+**What hypothesis ultimately led you to identify the buggy code, and why?**
+Hypothesis: The game loop or timer interval remains active after the game ends because the cleanup function was omitted or referenced without execution. This was confirmed by inspecting the `endGame()` method in `GameScreenController.ts`.
+
+#### Backward tracing
+
+1. **Symptom:** Game-over sound loops continuously every second and the game forces its way back to the results screen immediately after clicking Play Again.
+2. **Traced back to:** `GameScreenController.endGame()` being repeatedly executed every 1000ms.
+3. **Traced back to:** `this.gameTimer` interval never being cleared.
+4. **Buggy code:** GameScreenController.ts; private endGame(); Line 87: `this.stopTimer;` missing execution parentheses inside `endGame()`.
+
+### Confirming the fix
+
+Started a game, let the timer reach zero, verified that the game-over sound plays only once, checked that the score is recorded a single time, and confirmed that clicking Play Again returns a stable start screen.
