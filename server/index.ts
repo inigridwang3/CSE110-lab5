@@ -50,7 +50,7 @@ app.get("/api/stats", (_req, res) => {
 	let best = 0;
 	for (let i = 0; i < entries.length; i++) {
 		total = total + entries[i].score;
-		if (entries[i].score < best) {
+		if (entries[i].score > best) {
 			best = entries[i].score;
 		}
 	}
