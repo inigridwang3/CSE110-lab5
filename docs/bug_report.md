@@ -1,7 +1,7 @@
 # Lemon Clicker Bug Report
 
 **Name:** Inigrid Wang
-**Tickets solved:** 1
+**Tickets solved:** 1, 2, 3, 4, 5
 
 ---
 
