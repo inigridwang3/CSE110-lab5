@@ -79,3 +79,34 @@ Hypothesis: The server-side code calculating the best score uses an incorrect co
 
 Restarted the Express server, and verified via the browser that the start screen correctly displays `Best: 15`.
 
+---
+
+## Ticket 3: The lemon only lands in four spots
+
+### Actual cause
+
+**File / function:** `src/screens/GameScreen/GameScreenView.ts` / `randomizeLemonPosition()`
+
+**What was wrong:** The position generator used `Math.round(Math.random())` instead of continuous random values, forcing coordinates to strictly evaluate to either 0 or 1 multiplier offsets. This restricted the lemon's movement to only four fixed corner positions.
+
+### Fix
+
+Replaced `Math.round(Math.random())` with continuous `Math.random()` scaling across `(maxX - minX)` and `(maxY - minY)` to allow the lemon to spawn anywhere within the play area bounds.
+
+### How did you find it?
+
+#### Hypothesis testing
+
+**What hypothesis ultimately led you to identify the buggy code, and why?**
+Hypothesis: The coordinate generation logic uses a binary choice (like 0 or 1 multipliers) instead of a continuous float multiplication, confining placements to extremes. This was confirmed by inspecting `randomizeLemonPosition()` in `GameScreenView.ts`.
+
+#### Backward tracing
+
+1. **Symptom:** The lemon repeatedly jumps between the same four spots near the corners.
+2. **Traced back to:** `GameScreenView.randomizeLemonPosition()` calculating coordinates for `this.lemonImage`.
+3. **Traced back to:** `Math.round(Math.random())` evaluating exclusively to binary step bounds.
+4. **Buggy code:** GameScreenView.ts; randomizeLemonPosition(); line 85: `const randomX = Math.round(Math.random()) * (maxX - minX) + minX;` line 86: `const randomY = Math.round(Math.random()) * (maxY - minY) + minY;`
+
+### Confirming the fix
+
+Started a new game, clicked the lemon multiple times, and verified that it now spawns dynamically and unpredictably across various random coordinates on the stage.
