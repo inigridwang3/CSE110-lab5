@@ -142,3 +142,35 @@ Hypothesis: The game loop or timer interval remains active after the game ends b
 ### Confirming the fix
 
 Started a game, let the timer reach zero, verified that the game-over sound plays only once, checked that the score is recorded a single time, and confirmed that clicking Play Again returns a stable start screen.
+
+---
+
+## Ticket 5: Leaderboard dates show "undefined"
+
+### Actual cause
+
+**File / function:** `src/screens/ResultsScreen/ResultsScreenView.ts` / `updateLeaderboard()`
+
+**What was wrong:** The leaderboard rendering logic attempted to read `entry.timestamp`, but the backend/model object provided the date property under `entry.date`. Because `entry.timestamp` did not exist on the entry objects, JavaScript evaluated it as `undefined`.
+
+### Fix
+
+Updated the string interpolation in `updateLeaderboard()` to reference `entry.date` (or a fallback check) so timestamps render correctly alongside scores.
+
+### How did you find it?
+
+#### Hypothesis testing
+
+**What hypothesis ultimately led you to identify the buggy code, and why?**
+Hypothesis: There is a property name mismatch between the leaderboard data object and the view code (e.g., trying to read `timestamp` when the data uses `date`). This was confirmed by inspecting `ResultsScreenView.ts`.
+
+#### Backward tracing
+
+1. **Symptom:** Leaderboard shows scores correctly followed by `- undefined` for every entry.
+2. **Traced back to:** `ResultsScreenView.updateLeaderboard()` formatting lines using `entry.timestamp`.
+3. **Traced back to:** The leaderboard entry data structure providing `date` instead of `timestamp`.
+4. **Buggy code:** ResultsScreenView.ts; updateLeaderboard(); line 106: `${entry.score} - ${entry.timestamp}` evaluating `timestamp` as undefined.
+
+### Confirming the fix
+
+Finished a test game, navigated to the Game Over screen, and verified that the Top Scores list successfully displays both the score and the correct timestamp string without any `undefined` values.
