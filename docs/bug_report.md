@@ -151,26 +151,26 @@ Started a game, let the timer reach zero, verified that the game-over sound play
 
 **File / function:** `ResultsScreenView.ts` / `updateLeaderboard()`
 
-**What was wrong:** The leaderboard rendering logic attempted to read `entry.timestamp`, but the backend/model object provided the date property under `entry.date`. Because `entry.timestamp` did not exist on the entry objects, JavaScript evaluated it as `undefined`.
+**What was wrong:** A property name mismatch existed between the backend and frontend. The Express server stored leaderboard entries using the property `{ score, time }`, whereas the frontend view and model attempted to read properties named `timestamp`. Consequently, JavaScript evaluated the accessed property as `undefined`.
 
 ### Fix
 
-Updated the string interpolation in `updateLeaderboard()` to reference `entry.date` (or a fallback check) so timestamps render correctly alongside scores.
+Updated the leaderboard view and data model types to correctly reference `entry.time` as provided by the backend API payload.
 
 ### How did you find it?
 
 #### Hypothesis testing
 
 **What hypothesis ultimately led you to identify the buggy code, and why?**
-Hypothesis: There is a property name mismatch between the leaderboard data object and the view code (e.g., trying to read `timestamp` when the data uses `date`). This was confirmed by inspecting `ResultsScreenView.ts`.
+Hypothesis: The property name returned in the JSON response from `server/index.ts` does not match the property name requested by `ResultsScreenView.ts`. This was verified by inspecting both the Express server route and the frontend view code.
 
 #### Backward tracing
 
-1. **Symptom:** Leaderboard shows scores correctly followed by `- undefined` for every entry.
-2. **Traced back to:** `ResultsScreenView.updateLeaderboard()` formatting lines using `entry.timestamp`.
-3. **Traced back to:** The leaderboard entry data structure providing `date` instead of `timestamp`.
-4. **Buggy code:** ResultsScreenView.ts; updateLeaderboard(); line 106: `${entry.score} - ${entry.timestamp}` evaluating `timestamp` as undefined.
+1. **Symptom:** Leaderboard dates rendered as `undefined` for every score entry.
+2. **Traced back to:** `ResultsScreenView.updateLeaderboard()` reading properties not present in the server's JSON object.
+3. **Traced back to:** `server/index.ts` saving objects with `time: new Date().toLocaleString()`.
+4. **Buggy code:** Property mismatch between frontend line 106: (`entry.timestamp`) and backend (`entry.time`).
 
 ### Confirming the fix
 
-Finished a test game, navigated to the Game Over screen, and verified that the Top Scores list successfully displays both the score and the correct timestamp string without any `undefined` values.
+Played a test game, submitted a score, and verified on the Game Over screen that the leaderboard successfully displays the score alongside the correct timestamp string.
