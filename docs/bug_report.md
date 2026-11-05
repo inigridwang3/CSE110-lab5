@@ -87,7 +87,7 @@ Restarted the Express server, and verified via the browser that the start screen
 
 **File / function:** GameScreenView.ts / randomizeLemonPosition()
 
-**What was wrong:** The position generator used Math.round(Math.random()) instead of continuous random values. Math.round rounds the input to the closet whole number, so the coordinates evaluate to either 0 or 1 multiplier offsets, restricting the lemon's movement to only four corner positions.
+**What was wrong:** The position generator used Math.round(Math.random()) instead of continuous random values. Math.round rounds the input to either 0 or 1 because Math.random() generates a number between [0, 1) and Math.round rounds it to the closest whole number. Math.round(Math.random()) * (maxX - minX) + minX would give minX when the rounding ends in 0, and maxX when rounding ends in 1. Math.round(Math.random()) * (maxY - minY) + minY would give minY when round ends in 0 and maxY when rounding ends in 1. Hence, the lemon's movement to only four corner positions.
 
 ### Fix
 
